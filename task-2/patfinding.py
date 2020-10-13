@@ -3,7 +3,7 @@ import pygame
 
 
 WIDTH = 800
-ROWS = 30
+ROWS = 50
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption('A* Path Finding')
 
@@ -17,6 +17,26 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0)
 GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
+
+
+def read_file(filename):
+    with open(filename, 'r') as f:
+        n = int(f.readline().replace("\n", ""))
+
+        num_of_lines = 0
+        coordinates = []
+        for line in f:
+            x, y = line.split(" ")
+            x = int(x)
+            y = int(y)
+            coordinates.append((x, y))
+            num_of_lines += 1
+
+        if num_of_lines != int(n):
+            raise Exception("The number of elements is not {}".format(n))
+
+    return coordinates
+
 
 class Square:
     def __init__(self, row, col, width, total_rows):
@@ -201,12 +221,51 @@ def get_clicked_pos(pos, rows, width):
     return row, col
 
 
+def draw_line_btwn_points(width, grid, x1, y1, x2, y2):
+    num_of_steps = 100
+    gap = width // ROWS
+    cord_step_x = abs(x2 * gap - x1 * gap) * 1000 // num_of_steps
+    cord_step_y = abs(y2 * gap - y1 * gap) * 1000 // num_of_steps
+    flip_x_sign = -1
+    flip_y_sign = -1
+
+    if x2 < x1:
+        flip_x_sign = 1
+
+    if y2 < y1:
+        flip_y_sign = 1
+
+    for i in range(num_of_steps):
+        row, col = get_clicked_pos((
+            x1 * gap + (-1) * flip_x_sign * i * cord_step_x // 1000,
+            y1 * gap + (-1) * flip_y_sign * i * cord_step_y // 1000
+        ), ROWS, width)
+        grid[row][col].make_barrier()
+
+
 def main(win, width):
+    coordinates = read_file('input/triangle.txt')
     grid = make_grid(ROWS, width)
 
     start = None
     end = None
     completed = False
+
+    x_prev = None
+    y_prev = None
+    x_first = None
+    y_first = None
+    for (x, y) in coordinates:
+        if (x_first is None and y_first is None):
+            x_first = x
+            y_first = y
+        if (x_prev is not None and y_prev is not None):
+            draw_line_btwn_points(width, grid, x, y, x_prev, y_prev)
+        x_prev = x
+        y_prev = y
+        grid[x][y].make_barrier()
+
+    draw_line_btwn_points(width, grid, x_prev, y_prev, x_first, y_first)
 
     while True:
         draw(win, grid, ROWS, width)
