@@ -243,14 +243,7 @@ def draw_line_btwn_points(width, grid, x1, y1, x2, y2):
         grid[row][col].make_barrier()
 
 
-def main(win, width):
-    coordinates = read_file('input/triangle.txt')
-    grid = make_grid(ROWS, width)
-
-    start = None
-    end = None
-    completed = False
-
+def draw_polygon(coordinates, width, grid):
     x_prev = None
     y_prev = None
     x_first = None
@@ -266,6 +259,17 @@ def main(win, width):
         grid[x][y].make_barrier()
 
     draw_line_btwn_points(width, grid, x_prev, y_prev, x_first, y_first)
+
+
+def main(win, width, polygon):
+    coordinates = read_file(polygon)
+    grid = make_grid(ROWS, width)
+
+    start = None
+    end = None
+    completed = False
+
+    draw_polygon(coordinates, width, grid)
 
     while True:
         draw(win, grid, ROWS, width)
@@ -323,4 +327,4 @@ def main(win, width):
 
 
 if __name__ == "__main__":
-    main(WIN, WIDTH)
+    main(WIN, WIDTH, 'input/polygonx2.txt')
